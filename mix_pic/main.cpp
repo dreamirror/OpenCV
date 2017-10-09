@@ -5,11 +5,11 @@
 #include <io.h>
 using namespace cv;
 using namespace std;
+Mat logo = imread("logo.png");
 
 void out_logo(string bgname) {
 	//载入图片  
-	Mat image = imread(bgname);
-	Mat logo = imread("logo.png");
+	Mat image = imread("bg\\"+bgname);
 
 	Mat imageROI;
 	imageROI = image(Rect(50,50, logo.cols, logo.rows));
