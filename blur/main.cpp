@@ -14,6 +14,7 @@ int g_SaveNum;
 Mat g_srcImage, g_dstImage;
 static void ContrasAndBright(int, void*);
 static void SavePic(int, void*);
+void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize);
 int main() {
 	//载入原图  
 	Mat image = imread("lb.jpg");
@@ -27,7 +28,7 @@ int main() {
 
 	//进行滤波操作  
 	Mat out;
-	boxFilter(image, out, -1, Size(5, 5));
+	my_boxFilter(image, out, 0, Size(5, 5));
 
 	//显示效果图  
 	imshow("均值滤波【效果图】", out);
@@ -37,7 +38,7 @@ int main() {
 	return 0;
 }
 
-void boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize, Point anchor) //方框均值滤波
+void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize) //方框均值滤波
 {
 	Mat src = _src.getMat();//原图的矩阵
 	int sdepth = src.depth(),cn = src.channels();
@@ -53,18 +54,24 @@ void boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize, Point 
 			{
 				double pix = 0.0;
 				int pix_num = 0;
-				for (int c_x = ((x - floor(ksize.width / 2)) >= 0 ? (x - floor(ksize.width / 2)) : 0); c_x >= ((x + ceil(ksize.width / 2)) < src.rows ? (x + ceil(ksize.width / 2)) : src.rows - 1); c_x++)
+				int temp = ((x - floor(ksize.width / 2)) >= 0 ? (x - floor(ksize.width / 2)) : 0);
+				//cout << temp << endl;
+				for (int c_x = ((x - floor(ksize.width / 2)) >= 0 ? (x - floor(ksize.width / 2)) : 0); c_x <= ((x + ceil(ksize.width / 2)) < src.cols ? (x + ceil(ksize.width / 2)) : src.cols - 1); c_x++)
 				{
-					for (int c_y = ((y - floor(ksize.height / 2)) >= 0 ? (y - floor(ksize.height / 2)) : 0); c_y >= ((y + ceil(ksize.height / 2)) < src.cols ? (y + ceil(ksize.height / 2)) : src.cols - 1); c_y++) {
+					for (int c_y = ((y - floor(ksize.height / 2)) >= 0 ? (y - floor(ksize.height / 2)) : 0); c_y <= ((y + ceil(ksize.height / 2)) < src.rows ? (y + ceil(ksize.height / 2)) : src.rows - 1); c_y++) {
 						pix += src.at<Vec3b>(c_y, c_x)[c];
 						pix_num++;
 					}
 				}
 				dst.at<Vec3b>(y, x)[c] = pix / pix_num;
+				//cout << dst.at<Vec3b>(y, x)[c] << endl;
 			}
 		}
 	}
 
 }
+
+//求每个通道的标准差
+
 
 
