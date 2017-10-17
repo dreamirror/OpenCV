@@ -16,7 +16,7 @@ static void ContrasAndBright(int, void*);
 static void SavePic(int, void*);
 int main() {
 	//载入原图  
-	Mat image = imread("1.jpg");
+	Mat image = imread("lb.jpg");
 
 	//创建窗口  
 	namedWindow("均值滤波【原图】");
@@ -27,7 +27,7 @@ int main() {
 
 	//进行滤波操作  
 	Mat out;
-	boxFilter(image, out, -1, Size(10, 10));
+	boxFilter(image, out, -1, Size(5, 5));
 
 	//显示效果图  
 	imshow("均值滤波【效果图】", out);
@@ -52,13 +52,15 @@ void boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize, Point 
 			for (int c = 0; c < 3; c++)
 			{
 				double pix = 0.0;
+				int pix_num = 0;
 				for (int c_x = ((x - floor(ksize.width / 2)) >= 0 ? (x - floor(ksize.width / 2)) : 0); c_x >= ((x + ceil(ksize.width / 2)) < src.rows ? (x + ceil(ksize.width / 2)) : src.rows - 1); c_x++)
 				{
 					for (int c_y = ((y - floor(ksize.height / 2)) >= 0 ? (y - floor(ksize.height / 2)) : 0); c_y >= ((y + ceil(ksize.height / 2)) < src.cols ? (y + ceil(ksize.height / 2)) : src.cols - 1); c_y++) {
 						pix += src.at<Vec3b>(c_y, c_x)[c];
+						pix_num++;
 					}
 				}
-				dst.at<Vec3b>(y, x)[c] = pix / 3;
+				dst.at<Vec3b>(y, x)[c] = pix / pix_num;
 			}
 		}
 	}
