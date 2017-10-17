@@ -55,7 +55,6 @@ void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize) //�
 				double pix = 0.0;
 				int pix_num = 0;
 				int temp = ((x - floor(ksize.width / 2)) >= 0 ? (x - floor(ksize.width / 2)) : 0);
-				//cout << temp << endl;
 				for (int c_x = ((x - floor(ksize.width / 2)) >= 0 ? (x - floor(ksize.width / 2)) : 0); c_x <= ((x + ceil(ksize.width / 2)) < src.cols ? (x + ceil(ksize.width / 2)) : src.cols - 1); c_x++)
 				{
 					for (int c_y = ((y - floor(ksize.height / 2)) >= 0 ? (y - floor(ksize.height / 2)) : 0); c_y <= ((y + ceil(ksize.height / 2)) < src.rows ? (y + ceil(ksize.height / 2)) : src.rows - 1); c_y++) {
@@ -64,14 +63,13 @@ void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size ksize) //�
 					}
 				}
 				dst.at<Vec3b>(y, x)[c] = pix / pix_num;
-				//cout << dst.at<Vec3b>(y, x)[c] << endl;
 			}
 		}
 	}
 
 }
 
-//求每个通道的标准差
+
 
 
 
