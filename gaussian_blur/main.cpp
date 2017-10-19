@@ -8,9 +8,21 @@
 #define KEY_DOWN(VK_NONAME) ((GetAsyncKeyState(VK_NONAME) & 0x8000) ? 1:0)
 using namespace std;
 using namespace cv;
+bool is_debug = true;
 void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size2d ksize);
 Vec3f getSigma(int x , int y,Mat src, Size2d ksize);
 double PI = 3.1415926;
+void my_print(String str) {
+	if (is_debug) {
+			cout << str << endl;
+	}
+}
+
+void my_print(String str, double num) {
+	if (is_debug) {
+			cout << str << num << endl;
+	}
+}
 int main() {
 	//载入原图  
 	Mat image = imread("lb.jpg");
@@ -61,27 +73,24 @@ void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size2d k_size) 
 					
 				{
 					for (int c_y = ((y - floor(ksize.height / 2)) >= 0 ? (y - floor(ksize.height / 2)) : 0); c_y <= ((y + ceil(ksize.height / 2)) < src.rows ? (y + ceil(ksize.height / 2)) : src.rows - 1); c_y++) {
-						//double a = exp(-((x - c_x)*(x - c_x) + (y - c_y)*(y - c_y)) / 2 * sigma[c]) / (2 * PI * sigma[c]);
-						//cout << "sigma[c]==" << sigma[c] << endl;
-						//cout << "-( (x - c_x)*(x - c_x) +(y- c_y)*(y - c_y)) / 2 * sigma[c]==" << -((x - c_x)*(x - c_x) + (y - c_y)*(y - c_y)) / 2 * sigma[c] << endl;
 						double f_x = x;
 						double fc_x = c_x;
 						double f_y = y;
 						double fc_y = c_y;
-						/*
-						cout << "x = " <<x << endl;
-						cout << "c_x = " << c_x << endl;
-						cout << "y = " << y << endl;
-						cout << "c_y = " << c_y << endl;
-						cout << " -( (f_x - fc_x)*(f_x - fc_x) +(f_y - fc_y)*(f_y - fc_y)) / 2 * sigma[c]* sigma[c] ==" << -((f_x - fc_x)*(f_x - fc_x) + (f_y - fc_y)*(f_y - fc_y)) / 2 * sigma[c] * sigma[c] << endl;
 
-						cout << " exp(-( (x - c_x)*(x - c_x) +(y- c_y)*(y - c_y)) / 2 * sigma[c]* sigma[c]) ==" << exp(-(((double)f_x - (double)fc_x)*((double)f_x - (double)fc_x) + ((double)f_y - (double)fc_y)*((double)f_y - (double)fc_y)) / 2 * sigma[c] * sigma[c]) << endl;
-						cout << "权值==" << exp(-(((double)f_x - (double)fc_x)*((double)f_x - (double)fc_x) + ((double)f_y - (double)fc_y)*((double)f_y - (double)fc_y)) / 2 * sigma[c] * sigma[c]) / (2 * PI * sigma[c])<<endl;
-						cout << "@@@@@" << endl;*/
-						weight += exp(-((f_x - fc_x)*(f_x - fc_x) + (f_y - fc_y)*(f_y - fc_y)) / 2 * sigma[c] * sigma[c]) / (2 * PI * sigma[c]);
+						double numer = -(((double)f_x - (double)fc_x)*((double)f_x - (double)fc_x) + ((double)f_y - (double)fc_y)*((double)f_y - (double)fc_y));
+						double deno = 2 * sigma[c] * sigma[c];
 
-						dst.at<Vec3b>(y, x)[c] =  exp(-( (f_x - fc_x)*(f_x - fc_x) +(f_y - fc_y)*(f_y - fc_y)) / 2 * sigma[c]* sigma[c]) / (2 * PI * sigma[c]);
-						
+						//my_print(c + "方差 ==" , sigma[c]);
+						//my_print("分子 ==",numer);
+						//my_print("分母 ==", deno);
+						//my_print("幂 ==", numer / deno);
+						//my_print(" e的n次方 ==", exp(numer / deno));
+						//my_print("权值===", exp(numer / deno) / (2 * PI * sigma[c]));
+						//my_print("@@@@@");
+						//cout << endl;
+						//cout << endl;
+						weight += exp(numer / deno) / (2 * PI * sigma[c]);
 					}
 				}
 
@@ -93,16 +102,17 @@ void my_boxFilter(InputArray _src, OutputArray _dst, int ddepth, Size2d k_size) 
 						double fc_x = c_x;
 						double f_y = y;
 						double fc_y = c_y;
-						weight += exp(-((f_x - fc_x)*(f_x - fc_x) + (f_y - fc_y)*(f_y - fc_y)) / 2 * sigma[c] * sigma[c]) / (2 * PI * sigma[c]);
-
-						pix += src.at<Vec3b>(c_y, c_x)[c] * (exp(-((f_x - fc_x)*(f_x - fc_x) + (f_y - fc_y)*(f_y - fc_y)) / 2 * sigma[c] * sigma[c]) / (2 * PI * sigma[c]) / weight);
+						double numer = -(((double)f_x - (double)fc_x)*((double)f_x - (double)fc_x) + ((double)f_y - (double)fc_y)*((double)f_y - (double)fc_y));
+						double deno = 2 * sigma[c] * sigma[c];
+						pix += src.at<Vec3b>(c_y, c_x)[c] * (exp(numer / deno) / (2 * PI * sigma[c]) / weight);
 
 					}
 				}
 				dst.at<Vec3b>(y, x)[c] = pix;
-				//cout << "--------------------------------" << endl;
+				//my_print("------------------------------------");
 				
 			}
+			//my_print("#############################################");
 		}
 	}
 }
@@ -142,12 +152,9 @@ Vec3f getSigma(int src_x,int src_y,Mat src, Size2d ksize) {
 			for (int c_y = ((src_y - floor(ksize.height / 2)) >= 0 ? (src_y - floor(ksize.height / 2)) : 0); c_y <= ((src_y + ceil(ksize.height / 2)) < src.rows ? (src_y + ceil(ksize.height / 2)) : src.rows - 1); c_y++) {
 				float temp = ((float)src.at<Vec3b>(c_x, c_x)[c] - mean[c]);
 				float a = mean[c];
-			//	cout << temp << endl;
-				//cout << a << endl;
 				result[c] += temp * temp;
 			}
 		}
-	//	cout << "result == " << result[c] << endl;
 	//	cout << "----------------------------------" << endl;
 		result[c] = result[c] / (n -1); //方差
 	}
